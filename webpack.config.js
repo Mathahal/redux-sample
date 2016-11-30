@@ -26,7 +26,7 @@ module.exports = {
     new BrowserSyncPlugin({
       host: 'localhost',
       port: 3000,
-      proxy: 'http://localhost:8888/',
+      proxy: 'http://localhost/',
       files: ["./*.html", "./*.php", "./src"]
     },{
       reload: true

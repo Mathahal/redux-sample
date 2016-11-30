@@ -4,14 +4,15 @@ import ReactDOM from 'react-dom'
 import { createStore } from 'redux'
 import { Provider, connect } from 'react-redux'
 
-
-request
-  .get(this.props.url)
-  .query({param:this.state.param})
-  .end(( err, res ) => {
-    let data = JSON.parse(res.text)
-    this.props.onEventCallBack(data);
-  })
+const cl = obj => console.log( obj )
+// 
+// request
+//   .get(this.props.url)
+//   .query({param:this.state.param})
+//   .end(( err, res ) => {
+//     let data = JSON.parse(res.text)
+//     this.props.onEventCallBack(data)
+//   })
 
 
 /* Viewの実装 */
@@ -20,28 +21,32 @@ class FormApp extends React.Component {
   render() {
     return (
       <div>
-        <FormInput handleClick={this.props.onClick} />
+        <FormInput handleSend={this.props.onClickToSend} handleClear={this.props.onClickToClear} />
         <FormDisplay data={this.props.value} />
       </div>
-    );
+    )
   }
 }
 
 // View (Presentational Components)
 class FormInput extends React.Component {
   send(e) {
-    e.preventDefault();
-    this.props.handleClick(this.myInput.value.trim());
-    this.myInput.value = '';
-    return;
+    e.preventDefault()
+    this.props.handleSend(this.refs.myInput.value.trim())
+    this.refs.myInput.value = ''
+    return
+  }
+  clear(){
+    this.props.handleClear()
   }
   render() {
     return (
       <form>
-        <input type="text" ref={(ref) => (this.myInput = ref)} defaultValue="" />
-        <button onClick={(event) => this.send(event)}>Send</button>
+        <input type="text" ref="myInput" defaultValue="" />
+        <button onClick={ (event) => { this.send(event) }}>Send</button>
+        <p onClick={ (event) => { this.clear() } }>Clear</p>
       </form>
-    );
+    )
   }
 }
 
@@ -50,21 +55,28 @@ class FormDisplay extends React.Component {
   render() {
     return (
       <div>{this.props.data}</div>
-    );
+    )
   }
 }
 
 /* Actionsの実装 */
 // Action名の定義
-const SEND = 'SEND';
+const SEND = 'SEND',
+      CLEAR = 'CLEAR'
 
 // Action Creators
 function send(value) {
   // Action
   return {
     type: SEND, value,
-  };
+  }
 }
+function clear() {
+  return {
+    type: CLEAR
+  }
+}
+
 
 /* Reducersの実装 */
 function formReducer(state, action) {
@@ -72,37 +84,40 @@ function formReducer(state, action) {
     case 'SEND':
       return Object.assign({}, state, {
         value: action.value,
-      });
+      })
+    case 'CLEAR':
+      return Object.assign({}, state, {
+        value: 'cleared',
+      })      
     default:
-      return state;
+      return state
   }
 }
-
 /* Storeの実装 */
 const initialState = {
   value: null,
-};
-const store = createStore(formReducer, initialState);
+}
+const store = createStore(formReducer, initialState)
+
 
 // Connect to Redux
 function mapStateToProps(state) {
-  window.console.log(state);
   return {
-    value: state.value,
-  };
+    value: state.value
+  }
 }
 function mapDispatchToProps(dispatch) {
   return {
-    onClick(value) {
-      console.log(dispatch)
-      dispatch(send(value));
+    onClickToSend(value) {
+      dispatch(send(value))
     },
-  };
+    onClickToClear() {
+      dispatch(clear())
+    },
+  }
 }
-const AppContainer = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(FormApp);
+
+const AppContainer = connect( mapStateToProps, mapDispatchToProps )(FormApp)
 
 // Rendering
 ReactDOM.render(
@@ -110,4 +125,4 @@ ReactDOM.render(
     <AppContainer />
   </Provider>,
   document.querySelector('.content')
-);
+)

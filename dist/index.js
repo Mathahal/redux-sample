@@ -78,10 +78,18 @@
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	_superagent2.default.get(undefined.props.url).query({ param: undefined.state.param }).end(function (err, res) {
-	  var data = JSON.parse(res.text);
-	  undefined.props.onEventCallBack(data);
-	});
+	var cl = function cl(obj) {
+	  return console.log(obj);
+	};
+	// 
+	// request
+	//   .get(this.props.url)
+	//   .query({param:this.state.param})
+	//   .end(( err, res ) => {
+	//     let data = JSON.parse(res.text)
+	//     this.props.onEventCallBack(data)
+	//   })
+
 
 	/* Viewの実装 */
 	// View (Container Components)
@@ -101,7 +109,7 @@
 	      return _react2.default.createElement(
 	        'div',
 	        null,
-	        _react2.default.createElement(FormInput, { handleClick: this.props.onClick }),
+	        _react2.default.createElement(FormInput, { handleSend: this.props.onClickToSend, handleClear: this.props.onClickToClear }),
 	        _react2.default.createElement(FormDisplay, { data: this.props.value })
 	      );
 	    }
@@ -126,9 +134,14 @@
 	    key: 'send',
 	    value: function send(e) {
 	      e.preventDefault();
-	      this.props.handleClick(this.myInput.value.trim());
-	      this.myInput.value = '';
+	      this.props.handleSend(this.refs.myInput.value.trim());
+	      this.refs.myInput.value = '';
 	      return;
+	    }
+	  }, {
+	    key: 'clear',
+	    value: function clear() {
+	      this.props.handleClear();
 	    }
 	  }, {
 	    key: 'render',
@@ -138,15 +151,20 @@
 	      return _react2.default.createElement(
 	        'form',
 	        null,
-	        _react2.default.createElement('input', { type: 'text', ref: function ref(_ref) {
-	            return _this3.myInput = _ref;
-	          }, defaultValue: '' }),
+	        _react2.default.createElement('input', { type: 'text', ref: 'myInput', defaultValue: '' }),
 	        _react2.default.createElement(
 	          'button',
 	          { onClick: function onClick(event) {
-	              return _this3.send(event);
+	              _this3.send(event);
 	            } },
 	          'Send'
+	        ),
+	        _react2.default.createElement(
+	          'p',
+	          { onClick: function onClick(event) {
+	              _this3.clear();
+	            } },
+	          'Clear'
 	        )
 	      );
 	    }
@@ -185,13 +203,19 @@
 	// Action名の定義
 
 
-	var SEND = 'SEND';
+	var SEND = 'SEND',
+	    CLEAR = 'CLEAR';
 
 	// Action Creators
 	function send(value) {
 	  // Action
 	  return {
 	    type: SEND, value: value
+	  };
+	}
+	function clear() {
+	  return {
+	    type: CLEAR
 	  };
 	}
 
@@ -202,11 +226,14 @@
 	      return Object.assign({}, state, {
 	        value: action.value
 	      });
+	    case 'CLEAR':
+	      return Object.assign({}, state, {
+	        value: 'cleared'
+	      });
 	    default:
 	      return state;
 	  }
 	}
-
 	/* Storeの実装 */
 	var initialState = {
 	  value: null
@@ -215,19 +242,21 @@
 
 	// Connect to Redux
 	function mapStateToProps(state) {
-	  window.console.log(state);
 	  return {
 	    value: state.value
 	  };
 	}
 	function mapDispatchToProps(dispatch) {
 	  return {
-	    onClick: function onClick(value) {
-	      console.log(dispatch);
+	    onClickToSend: function onClickToSend(value) {
 	      dispatch(send(value));
+	    },
+	    onClickToClear: function onClickToClear() {
+	      dispatch(clear());
 	    }
 	  };
 	}
+
 	var AppContainer = (0, _reactRedux.connect)(mapStateToProps, mapDispatchToProps)(FormApp);
 
 	// Rendering
