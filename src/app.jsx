@@ -12,7 +12,7 @@ class FormApp extends React.Component {
   render() {
     return (
       <div>
-        <FormInput url="/api.php" handleSend={this.props.onClickToSend} handleClear={this.props.onClickToClear} />
+        <FormInput url="/api.php" handleSend={this.props.onClickToSend} />
         <FormDisplay data={this.props.value} />
       </div>
     )
@@ -39,18 +39,14 @@ class FormInput extends React.Component {
         for (var value of data.param) {
           str += `id: ${value.id}, message: ${value.message}\n`
         }
-        this.props.handleSend( str )
+        this.props.handleSend( data.param )
       })
-  }
-  clear(){
-    this.props.handleClear()
   }
   render() {
     return (
       <form>
         <input type="text" ref="myInput" defaultValue="" />
         <button onClick={ (event) => { this.send(event) }}>Send</button>
-        <p onClick={ (event) => { this.clear() } }>Clear</p>
       </form>
     )
   }
@@ -59,30 +55,29 @@ class FormInput extends React.Component {
 // Veiw (Presentational Components)
 class FormDisplay extends React.Component {
   render() {
+    
+    var testsetset = this.props.data.map( (single) => {
+      return( <li key={single.id}>{single.message}</li> )
+    } )
     return (
-      <div>{this.props.data}</div>
+      <ul>
+        {testsetset}
+      </ul>
     )
   }
 }
 
 /* Actionsの実装 */
 // Action名の定義
-const SEND = 'SEND',
-      CLEAR = 'CLEAR'
+const SEND = 'SEND'
 
 // Action Creators
 function send(value) {
   // Action
   return {
-    type: SEND, value,
+    type: SEND, value
   }
 }
-function clear() {
-  return {
-    type: CLEAR
-  }
-}
-
 
 /* Reducersの実装 */
 function formReducer(state, action) {
@@ -91,17 +86,13 @@ function formReducer(state, action) {
       return Object.assign({}, state, {
         value: action.value,
       })
-    case 'CLEAR':
-      return Object.assign({}, state, {
-        value: 'cleared',
-      })      
     default:
       return state
   }
 }
 /* Storeの実装 */
 const initialState = {
-  value: null,
+  value: [],
 }
 const store = createStore(formReducer, initialState)
 
@@ -116,9 +107,6 @@ function mapDispatchToProps(dispatch) {
   return {
     onClickToSend(value) {
       dispatch(send(value))
-    },
-    onClickToClear() {
-      dispatch(clear())
     },
   }
 }

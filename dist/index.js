@@ -100,7 +100,7 @@
 	      return _react2.default.createElement(
 	        'div',
 	        null,
-	        _react2.default.createElement(FormInput, { url: '/api.php', handleSend: this.props.onClickToSend, handleClear: this.props.onClickToClear }),
+	        _react2.default.createElement(FormInput, { url: '/api.php', handleSend: this.props.onClickToSend }),
 	        _react2.default.createElement(FormDisplay, { data: this.props.value })
 	      );
 	    }
@@ -164,13 +164,8 @@
 	          }
 	        }
 
-	        _this3.props.handleSend(str);
+	        _this3.props.handleSend(data.param);
 	      });
-	    }
-	  }, {
-	    key: 'clear',
-	    value: function clear() {
-	      this.props.handleClear();
 	    }
 	  }, {
 	    key: 'render',
@@ -187,13 +182,6 @@
 	              _this4.send(event);
 	            } },
 	          'Send'
-	        ),
-	        _react2.default.createElement(
-	          'p',
-	          { onClick: function onClick(event) {
-	              _this4.clear();
-	            } },
-	          'Clear'
 	        )
 	      );
 	    }
@@ -217,10 +205,18 @@
 	  _createClass(FormDisplay, [{
 	    key: 'render',
 	    value: function render() {
+
+	      var testsetset = this.props.data.map(function (single) {
+	        return _react2.default.createElement(
+	          'li',
+	          { key: single.id },
+	          single.message
+	        );
+	      });
 	      return _react2.default.createElement(
-	        'div',
+	        'ul',
 	        null,
-	        this.props.data
+	        testsetset
 	      );
 	    }
 	  }]);
@@ -232,19 +228,13 @@
 	// Action名の定義
 
 
-	var SEND = 'SEND',
-	    CLEAR = 'CLEAR';
+	var SEND = 'SEND';
 
 	// Action Creators
 	function send(value) {
 	  // Action
 	  return {
 	    type: SEND, value: value
-	  };
-	}
-	function clear() {
-	  return {
-	    type: CLEAR
 	  };
 	}
 
@@ -255,17 +245,13 @@
 	      return Object.assign({}, state, {
 	        value: action.value
 	      });
-	    case 'CLEAR':
-	      return Object.assign({}, state, {
-	        value: 'cleared'
-	      });
 	    default:
 	      return state;
 	  }
 	}
 	/* Storeの実装 */
 	var initialState = {
-	  value: null
+	  value: []
 	};
 	var store = (0, _redux.createStore)(formReducer, initialState);
 
@@ -279,9 +265,6 @@
 	  return {
 	    onClickToSend: function onClickToSend(value) {
 	      dispatch(send(value));
-	    },
-	    onClickToClear: function onClickToClear() {
-	      dispatch(clear());
 	    }
 	  };
 	}
