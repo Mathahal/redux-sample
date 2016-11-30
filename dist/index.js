@@ -81,15 +81,6 @@
 	var cl = function cl(obj) {
 	  return console.log(obj);
 	};
-	// 
-	// request
-	//   .get(this.props.url)
-	//   .query({param:this.state.param})
-	//   .end(( err, res ) => {
-	//     let data = JSON.parse(res.text)
-	//     this.props.onEventCallBack(data)
-	//   })
-
 
 	/* Viewの実装 */
 	// View (Container Components)
@@ -109,7 +100,7 @@
 	      return _react2.default.createElement(
 	        'div',
 	        null,
-	        _react2.default.createElement(FormInput, { handleSend: this.props.onClickToSend, handleClear: this.props.onClickToClear }),
+	        _react2.default.createElement(FormInput, { url: '/api.php', handleSend: this.props.onClickToSend, handleClear: this.props.onClickToClear }),
 	        _react2.default.createElement(FormDisplay, { data: this.props.value })
 	      );
 	    }
@@ -134,9 +125,47 @@
 	    key: 'send',
 	    value: function send(e) {
 	      e.preventDefault();
-	      this.props.handleSend(this.refs.myInput.value.trim());
+	      var val = this.refs.myInput.value.trim();
+	      if (val == '') return true;
+	      this.ajaxing(val);
 	      this.refs.myInput.value = '';
 	      return;
+	    }
+	  }, {
+	    key: 'ajaxing',
+	    value: function ajaxing(value) {
+	      var _this3 = this;
+
+	      _superagent2.default.get(this.props.url).query({ param: value }).end(function (err, res) {
+	        var data = JSON.parse(res.text),
+	            str = '';
+	        var _iteratorNormalCompletion = true;
+	        var _didIteratorError = false;
+	        var _iteratorError = undefined;
+
+	        try {
+	          for (var _iterator = data.param[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	            var value = _step.value;
+
+	            str += 'id: ' + value.id + ', message: ' + value.message + '\n';
+	          }
+	        } catch (err) {
+	          _didIteratorError = true;
+	          _iteratorError = err;
+	        } finally {
+	          try {
+	            if (!_iteratorNormalCompletion && _iterator.return) {
+	              _iterator.return();
+	            }
+	          } finally {
+	            if (_didIteratorError) {
+	              throw _iteratorError;
+	            }
+	          }
+	        }
+
+	        _this3.props.handleSend(str);
+	      });
 	    }
 	  }, {
 	    key: 'clear',
@@ -146,7 +175,7 @@
 	  }, {
 	    key: 'render',
 	    value: function render() {
-	      var _this3 = this;
+	      var _this4 = this;
 
 	      return _react2.default.createElement(
 	        'form',
@@ -155,14 +184,14 @@
 	        _react2.default.createElement(
 	          'button',
 	          { onClick: function onClick(event) {
-	              _this3.send(event);
+	              _this4.send(event);
 	            } },
 	          'Send'
 	        ),
 	        _react2.default.createElement(
 	          'p',
 	          { onClick: function onClick(event) {
-	              _this3.clear();
+	              _this4.clear();
 	            } },
 	          'Clear'
 	        )

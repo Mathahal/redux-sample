@@ -5,15 +5,6 @@ import { createStore } from 'redux'
 import { Provider, connect } from 'react-redux'
 
 const cl = obj => console.log( obj )
-// 
-// request
-//   .get(this.props.url)
-//   .query({param:this.state.param})
-//   .end(( err, res ) => {
-//     let data = JSON.parse(res.text)
-//     this.props.onEventCallBack(data)
-//   })
-
 
 /* Viewの実装 */
 // View (Container Components)
@@ -21,7 +12,7 @@ class FormApp extends React.Component {
   render() {
     return (
       <div>
-        <FormInput handleSend={this.props.onClickToSend} handleClear={this.props.onClickToClear} />
+        <FormInput url="/api.php" handleSend={this.props.onClickToSend} handleClear={this.props.onClickToClear} />
         <FormDisplay data={this.props.value} />
       </div>
     )
@@ -32,9 +23,24 @@ class FormApp extends React.Component {
 class FormInput extends React.Component {
   send(e) {
     e.preventDefault()
-    this.props.handleSend(this.refs.myInput.value.trim())
+    let val = this.refs.myInput.value.trim()
+    if( val == '' ) return true
+    this.ajaxing( val )
     this.refs.myInput.value = ''
     return
+  }
+  ajaxing( value ){
+    request
+      .get( this.props.url )
+      .query( { param: value } )
+      .end(( err, res ) => {
+        let data = JSON.parse(res.text),
+            str = ''
+        for (var value of data.param) {
+          str += `id: ${value.id}, message: ${value.message}\n`
+        }
+        this.props.handleSend( str )
+      })
   }
   clear(){
     this.props.handleClear()
